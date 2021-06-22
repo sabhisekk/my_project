@@ -15,7 +15,8 @@ Usage() {
  echo "-h is used to print this info"
  exit 1
 }
-
+usr=`whoami`
+if [ $usr != root ];then echo "Current user is not root, exiting";exit 0;fi
 remove_tmp_file(){
 rm -f xferlog* 
 
@@ -33,15 +34,44 @@ handle_signal()
  kill -9 $$
  exit 1
 }
+customer_array ()
+{
+
+select item; do
+# Check the selected menu item number
+if [ 1 -le "$REPLY" ] && [ "$REPLY" -le $# ];
+
+then
+echo "The selected customer is $item"
+break;
+else
+echo "Wrong selection: Select any number from 1-$#"
+fi
+done
+if [ "$item" == "BrightHouse" ];then
+   LOG_HOME='/Cloud/apps/SecureTransport/var/db/hist/logs/'
+elif [ "$item" == "GoldManSachs" ];then
+   LOG_HOME='/Cloud/apps/ST/SecureTransport/var/db/hist/logs/'
+elif [ "$item" == "JM Family" ];then
+  echo "Work in progress"
+elif [ "$item" == "'Citi Bank" ];then
+  echo "Work in progress"
+fi
+}
+
 file_op(){
  yr=`awk -F ',' '{print $1}' duration.txt`
  year=`expr $yr % 100`
  month=`awk -F ',' '{print $2}' duration.txt`
- cp /Cloud/apps/SecureTransport/var/db/hist/logs/xferlog.${yr}${month}* .
+ cp $LOG_HOME/xferlog.${yr}${month}* .
  tar -xzf file_s2.tar.gz
  file_name=`date -d 20$year-$month-1 '+%b_%Y'`
 }
 
+
+client=('BrightHouse' 'GoldManSachs' 'JM Family' 'Citi Bank')
+echo -e "Choose from the following partner\n"
+customer_array "${client[@]}"
 
 while getopts a:t:h arg
 do
@@ -93,8 +123,10 @@ else
    echo -e "\e[0;31m Invalid Argument given\e[0m"
    Usage
  fi
+ echo "***************Transaction Report count according to username for 2021/05 (TOP 5)***************"  >>  BHF_Detail_Report_$file_name.txt 2>&1 
  cat xferlog* | grep -v axway | grep -v SyncplicityArchAccount | rev | awk '{print $4}'|rev|sort|uniq -c|sort -nr | head -5 >> BHF_Detail_Report_$file_name.txt 2>&1
- cat xferlog*| grep -v axway |grep -v SyncplicityArchAccount | awk 'BEGIN{FS=" "} {print $8 " " $(NF-3)}'|uniq|awk '{ a[$2]+=$1 }END{ for(i in a) print a[i],i }'|sort -nr | head -5 | awk 'BEGIN{FS=" "} {print $1/1024/1024/1024 "GB" " " $2}'>> BHF_Detail_Report_$file_name.txt 2>&1
+echo -e "\n *************************************************\n" >>  BHF_Detail_Report_$file_name.txt 2>&1 
+# cat xferlog*| grep -v axway |grep -v SyncplicityArchAccount | awk 'BEGIN{FS=" "} {print $8 " " $(NF-3)}'|uniq|awk '{ a[$2]+=$1 }END{ for(i in a) print a[i],i }'|sort -nr | head -5 | awk 'BEGIN{FS=" "} {print $1/1024/1024/1024 "GB" " " $2}'>> BHF_Detail_Report_$file_name.txt 2>&1
  
  fi
  
