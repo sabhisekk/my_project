@@ -1,0 +1,23 @@
+#!/bin/bash
+echo -e "\n***************Transaction Detail Report for 20$1/$2 ***************\n"
+echo "Total_Transactions    : $(cat xferlog.20$1$2* | grep -v axway  |grep -v SyncplicityArchAccount | wc -l )"
+                echo -e "\nInbound_Total    : $(cat xferlog.20$1$2* | grep -v axway  |grep -v SyncplicityArchAccount | grep -wE "b n i r|b s i r|a s i r|b s j r|a n j r" | wc -l )"
+
+#                echo "Inbound_OK       : $(cat xferlog.20$1$2* | grep -v axway  |grep -v SyncplicityArchAccount | grep -wE "b n i r|b s i r|a s i r" | wc -l )"
+
+                echo -e "\nOutbound_Total   : $(cat xferlog.20$1$2* | grep -v axway  |grep -v SyncplicityArchAccount | grep -wE "b n o r|a s o r|b s o r|b n p r|b s p r |a s p r" | wc -l )"
+#               echo "Outbound_OK      : $(cat xferlog.20$1$2* | grep -v axway  |grep -v SyncplicityArchAccount | grep -wE "b n o r|a s o r|b s o r" | wc -l )"
+echo -e "\n *************************************************\n"
+
+echo -e "\n***************Transaction Report count according to BU for 20$1/$2 ***************\n"
+
+echo -e "Successful Transaction Inbound:-\n"
+for i in `awk -F "/" '{print $4}' xferlog.20$1$2*  | sort -u | uniq`;do
+  echo -e "$i:$(cat xferlog.20$1$2* | grep -w $i |  grep -v axway  |grep -v SyncplicityArchAccount | grep -wE "b n i r|b s i r|a s i r" | wc -l)"
+done
+
+echo -e "\nSuccessful Transaction Outbound:-\n"
+for i in `awk -F "/" '{print $4}' xferlog.20$1$2*  | sort -u | uniq`;do
+  echo -e "$i:$(cat xferlog.20$1$2* | grep -w $i |  grep -v axway  |grep -v SyncplicityArchAccount | grep -wE "b n o r|a s o r|b s o r" | wc -l)"
+done
+echo -e "\n *************************************************\n"
